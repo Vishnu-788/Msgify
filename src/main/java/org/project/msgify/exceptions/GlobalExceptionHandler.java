@@ -11,14 +11,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler({DataIntegrityViolationException.class})
-    public ResponseEntity<Object> handleUsernameDuplicateException(DataIntegrityViolationException e){
+    public ResponseEntity<String> handleUsernameDuplicateException(DataIntegrityViolationException e){
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body("Username already exists. Try something else.");
     }
 
     @ExceptionHandler({ConstraintViolationException.class})
-    public ResponseEntity<Object> handleUsernameViolationException(ConstraintViolationException e){
+    public ResponseEntity<String> handleUsernameViolationException(ConstraintViolationException e){
         String errorMessage = e.getConstraintViolations().stream()
                 .map(ConstraintViolation::getMessage)
                 .findFirst()
@@ -27,5 +27,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(errorMessage);
+    }
+
+    @ExceptionHandler({LoginFailedException.class})
+    public ResponseEntity<String> handleLoginFailedException(LoginFailedException e){
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(e.getMessage());
     }
 }
