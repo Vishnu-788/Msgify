@@ -8,13 +8,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.Objects;
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler({DataIntegrityViolationException.class})
-    public ResponseEntity<String> handleUsernameDuplicateException(DataIntegrityViolationException e){
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body("Username already exists. Try something else.");
+    public ResponseEntity<String> handleDuplicateException(DataIntegrityViolationException e){
+        String errorMessage = Objects.requireNonNull(e.getRootCause()).getMessage();
+        if(errorMessage.contains("Key (email)")){
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("There is an another account associated with this email.");
+        } else {
+            // Username unique violation is the only other case.
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("Username already exists. Try something else.");
+        }
     }
 
     @ExceptionHandler({ConstraintViolationException.class})
