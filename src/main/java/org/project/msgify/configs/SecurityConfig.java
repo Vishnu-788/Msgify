@@ -28,18 +28,25 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final JwtFilter jwtFilter;
+    private final CorsConfig corsConfig;
 
-    public SecurityConfig(UserDetailsService userDetailsService, JwtFilter jwtFilter){
+    public SecurityConfig(
+            CorsConfig corsConfig,
+            UserDetailsService userDetailsService,
+            JwtFilter jwtFilter
+    ){
+        this.corsConfig = corsConfig;
         this.userDetailsService = userDetailsService;
         this.jwtFilter = jwtFilter;
     }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {
         return http
+                .cors(customizer -> customizer.configurationSource(corsConfig))
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/auth/register")
+                        .requestMatchers("/api/auth/login", "/api/auth/register")
                         .permitAll()
                         .anyRequest()
                         .authenticated()
