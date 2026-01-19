@@ -1,8 +1,8 @@
 package org.project.msgify.services;
 
-import org.project.msgify.dto.UserDto;
+import org.project.msgify.dto.LoginDto;
+import org.project.msgify.dto.RegisterDto;
 import org.project.msgify.exceptions.LoginFailedException;
-import org.project.msgify.filters.JwtFilter;
 import org.project.msgify.models.Users;
 import org.project.msgify.repositories.UserRepo;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,26 +26,30 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
-    public void registerUser(UserDto userDto){
-        Users user = ConvertToEntity(userDto);
+    public String registerUser(RegisterDto registerDto){
+        Users user = ConvertToEntity(registerDto);
         user.setPassword(encoder.encode(user.getPassword()));
         userRepo.save(user);
+        return jwtService.createToken(user.getUsername());
     }
 
-    public String loginUser(UserDto userDto){
+    public String loginUser(LoginDto loginDto){
         try {
+            // Performs the authentication.
             Authentication auth = authManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(userDto.getUsername(), userDto.getPassword()));
+                    new UsernamePasswordAuthenticationToken(loginDto.username(), loginDto.password()));
         } catch(BadCredentialsException e){
+            // Throw the error so the Custom Global exception handler can handle it instead of the security exception handler.
             throw new LoginFailedException("Invalid Credentials.");
         }
-        return jwtService.createToken(userDto.getUsername());
+        return jwtService.createToken(loginDto.username());
     }
 
-    private Users ConvertToEntity(UserDto userDto){
+    private Users ConvertToEntity(RegisterDto registerDto){
         Users user = new Users();
-        user.setUsername(userDto.getUsername());
-        user.setPassword(userDto.getPassword());
+        user.setUsername(registerDto.username());
+        user.setEmail(registerDto.email());
+        user.setPassword(registerDto.password());
         return user;
     }
 }

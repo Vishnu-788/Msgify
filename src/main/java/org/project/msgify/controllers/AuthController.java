@@ -1,6 +1,8 @@
 package org.project.msgify.controllers;
 
-import org.project.msgify.dto.UserDto;
+import org.project.msgify.dto.AuthResponseDto;
+import org.project.msgify.dto.LoginDto;
+import org.project.msgify.dto.RegisterDto;
 import org.project.msgify.services.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,24 +21,22 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(
-            @RequestBody UserDto userDto
+    public ResponseEntity<AuthResponseDto> register(
+            @RequestBody RegisterDto registerDto
     ){
-
-        service.registerUser(userDto);
+        String token = service.registerUser(registerDto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body("Successfully created user with username: " + userDto.getUsername());
-
+                .body(new AuthResponseDto(registerDto.username(), token));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(
-            @RequestBody UserDto user
+    public ResponseEntity<AuthResponseDto> loginUser(
+            @RequestBody LoginDto loginDto
     ){
-        String token = service.loginUser(user);
+        String token = service.loginUser(loginDto);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(token);
+                .body(new AuthResponseDto(loginDto.username(), token));
     }
 }

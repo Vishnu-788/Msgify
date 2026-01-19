@@ -23,6 +23,15 @@ public class Users {
     @NotBlank(message = "Password cannot be empty.")
     private String password;
 
+    @Column(nullable = false, unique = true)
+    @NotBlank(message = "Email cannot be empty.")
+    @Pattern(
+            // Email with other domains.
+            regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$",
+            message = "Please provide a valid email address."
+    )
+    private String email;
+
     public Users(int id, String username, String password) {
         this.id = id;
         this.username = username;
@@ -45,6 +54,8 @@ public class Users {
         return password;
     }
 
+    public String getEmail(){ return email; }
+
     public void setId(int id) {
         this.id = id;
     }
@@ -56,6 +67,8 @@ public class Users {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public void setEmail(String email) { this.email = email; }
 
     @Override
     public String toString() {
